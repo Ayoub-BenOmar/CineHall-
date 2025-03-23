@@ -3,8 +3,12 @@
 namespace App\Providers;
 
 use App\Repositories\UserRepository;
+use App\Repositories\MovieRepository;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\UserRepositoryInterface;
+use App\Repositories\MovieRepositoryInterface;
+use App\Repositories\ScreeningRepository;
+use App\Repositories\ScreeningRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,6 +20,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             UserRepositoryInterface::class,
             UserRepository::class
+        );
+
+        $this->app->bind(
+            MovieRepositoryInterface::class,
+            MovieRepository::class
+        );
+
+        $this->app->bind(
+            ScreeningRepositoryInterface::class,
+            ScreeningRepository::class
         );
     }
 
