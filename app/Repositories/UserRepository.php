@@ -1,4 +1,5 @@
 <?php
+// app/Repositories/UserRepository.php
 namespace App\Repositories;
 
 use App\Models\User;
@@ -13,29 +14,24 @@ class UserRepository implements UserRepositoryInterface
         $this->user = $user;
     }
 
-    public function getAll()
-    {
-        return $this->user->all();
-    }
-
-    public function findById($id)
-    {
-        return $this->user->find($id);
-    }
-
     public function create(array $data)
     {
         return $this->user->create($data);
     }
 
-    public function update($id, array $data)
+    public function findByEmail(string $email)
+    {
+        return $this->user->where('email', $email)->first();
+    }
+
+    public function update(int $id, array $data)
     {
         $user = $this->user->find($id);
         $user->update($data);
         return $user;
     }
 
-    public function delete($id)
+    public function delete(int $id)
     {
         return $this->user->destroy($id);
     }
