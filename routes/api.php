@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HallController;
+use App\Http\Controllers\SeatController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileController;
@@ -29,4 +31,12 @@ Route::apiResource('movies', MovieController::class);
 // Screening routes
 Route::apiResource('screenings', ScreeningController::class);
 Route::get('/screenings/filter/{type}', [ScreeningController::class, 'filterByType']);
+
+// Hall routes
+Route::apiResource('halls', HallController::class);
+
+// Seat routes
+Route::apiResource('seats', SeatController::class);
+Route::get('/halls/{hallId}/available-seats', [SeatController::class, 'getAvailableSeats']);
+Route::post('/seats/reserve', [SeatController::class, 'reserveSeats']);
 
