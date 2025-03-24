@@ -20,7 +20,6 @@ class Hall extends Model
         return $this->hasMany(Seat::class);
     }
 
-    // Relationship with Screenings
     public function screenings()
     {
         return $this->hasMany(Screening::class);
