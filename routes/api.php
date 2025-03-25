@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScreeningController;
+use App\Http\Controllers\ReservationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -40,3 +41,7 @@ Route::apiResource('seats', SeatController::class);
 Route::get('/halls/{hallId}/available-seats', [SeatController::class, 'getAvailableSeats']);
 Route::post('/seats/reserve', [SeatController::class, 'reserveSeats']);
 
+Route::middleware('auth:api')->group(function () {
+    Route::post('/reservations', [ReservationController::class, 'store']);
+    Route::put('/reservations/{id}/cancel', [ReservationController::class, 'cancel']);
+});

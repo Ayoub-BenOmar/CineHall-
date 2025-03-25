@@ -12,6 +12,8 @@ use App\Repositories\HallRepositoryInterface;
 use App\Repositories\SeatRepositoryInterface;
 use App\Repositories\UserRepositoryInterface;
 use App\Repositories\MovieRepositoryInterface;
+use App\Repositories\ReservationRepository;
+use App\Repositories\ReservationRepositoryInterface;
 use App\Repositories\ScreeningRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
@@ -44,6 +46,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             SeatRepositoryInterface::class,
             SeatRepository::class
+        );
+
+        $this->app->bind(
+            ReservationRepositoryInterface::class,
+            ReservationRepository::class
         );
     }
 
