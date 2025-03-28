@@ -10,7 +10,7 @@ class Seat extends Model
     use HasFactory;
 
     protected $fillable = [
-        'hall_id', 'seat_number', 'is_reserved', 'is_vip', 'is_couple_seat'
+        'hall_id', 'seat_number', 'is_reserved'
     ];
 
     // Relationship with Hall

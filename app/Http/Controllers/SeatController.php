@@ -7,6 +7,8 @@ use App\Models\Screening;
 use Illuminate\Http\Request;
 use App\Services\SeatService;
 
+use function PHPUnit\Framework\isEmpty;
+
 class SeatController extends Controller
 {
     protected $seatService;
@@ -56,77 +58,60 @@ class SeatController extends Controller
 
     public function reserveSeats(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'screening_id' => 'required|exists:screenings,id',
-            'seat_id' => 'required|exists:seats,id' // Now accepting single seat
+            'seat_id' => 'required|min:1',
         ]);
     
-        $screening = Screening::find($request->screening_id);
-        $selectedSeat = Seat::find($request->seat_id);
+        // $screening = Screening::findOrFail($request->screening_id);
+        // $seatIds = $request->input('seat_ids');
+        // $seats = Seat::whereIn('id', $seatIds)->get();
+
+        $screening = Screening::findOrFail($validated['screening_id']);
+        $seatIds = $validated['seat_id'];
+        $seats = Seat::whereIn('id', $seatIds)->get();
     
-        $seatsToReserve = [$selectedSeat->id];
-    
-        // Handle VIP screenings
         if ($screening->type === 'VIP') {
-            $adjacentSeat = $this->findAdjacentCoupleSeat($selectedSeat);
-            
-            if (!$adjacentSeat) {
+                
+    
+            if (!$this->areSeatsAdjacent($seats[0], $seats[1])) {
                 return response()->json([
-                    'error' => 'No available adjacent seat for VIP couple reservation'
+                    'error' => 'Selected seats must be adjacent'
                 ], 422);
             }
-    
-            $seatsToReserve[] = $adjacentSeat->id;
+        }
+        if($seats.isEmpty()){
+             return response()->json('empty');
+        }
+        foreach ($seats as $seat) {
+            if ($seat->is_reserved) {
+                return response()->json([
+                    'error' => "Seat {$seat->seat_number} is already reserved"
+                ], 422);
+            }
         }
     
         try {
-            $this->seatService->reserveSeats($seatsToReserve);
-            
+            $this->seatService->reserveSeats($seatIds);
             return response()->json([
                 'message' => 'Seats reserved successfully',
-                'reserved_seats' => $seatsToReserve
+                'reserved_seats' => $seatIds
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
     
-    protected function findAdjacentCoupleSeat(Seat $seat)
+    protected function areSeatsAdjacent(Seat $seat1, Seat $seat2)
     {
-        // Get all seats in the same row
-        $rowSeats = Seat::where('hall_id', $seat->hall_id)
-                      ->where('seat_number', 'like', substr($seat->seat_number, 0, 1).'%')
-                      ->orderBy('seat_number')
-                      ->get();
+        if ($seat1->hall_id !== $seat2->hall_id) return false;
     
-        $currentPosition = null;
-        
-        // Find position in row
-        foreach ($rowSeats as $index => $rowSeat) {
-            if ($rowSeat->id === $seat->id) {
-                $currentPosition = $index;
-                break;
-            }
-        }
+        // Parse seat numbers (supports formats like "A1", "B12", etc.)
+        preg_match('/^([A-Z]+)(\d+)$/', $seat1->seat_number, $matches1);
+        preg_match('/^([A-Z]+)(\d+)$/', $seat2->seat_number, $matches2);
     
-        if ($currentPosition === null) return null;
-    
-        // Check left seat first
-        if ($currentPosition > 0) {
-            $leftSeat = $rowSeats[$currentPosition - 1];
-            if (!$leftSeat->is_reserved && $leftSeat->is_couple_seat) {
-                return $leftSeat;
-            }
-        }
-    
-        // Then check right seat
-        if ($currentPosition < count($rowSeats) - 1) {
-            $rightSeat = $rowSeats[$currentPosition + 1];
-            if (!$rightSeat->is_reserved && $rightSeat->is_couple_seat) {
-                return $rightSeat;
-            }
-        }
-    
-        return null;
+        // Same row and consecutive numbers
+        return $matches1[1] === $matches2[1] && 
+               abs($matches1[2] - $matches2[2]) === 1;
     }
 }

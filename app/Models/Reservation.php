@@ -10,11 +10,11 @@ class Reservation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'screening_id', 'seat_ids', 'status', 'expires_at'
+        'user_id', 'screening_id', 'status', 'expires_at', 'seat_id'
     ];
 
     protected $casts = [
-        'seat_ids' => 'array',
+        // 'seat_id' => 'array',
         'expires_at' => 'datetime'
     ];
 

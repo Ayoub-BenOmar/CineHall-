@@ -16,17 +16,15 @@ class ReservationController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'screening_id' => 'required|exists:screenings,id',
-            'seat_ids' => 'required|array',
-            'seat_ids.*' => 'exists:seats,id'
+            'seat_id' => 'required|integer|exists:seats,id' // SINGULAR
         ]);
-
         try {
             $reservation = $this->reservationService->createReservation([
                 'user_id' => auth()->id(),
-                'screening_id' => $request->screening_id,
-                'seat_ids' => $request->seat_ids
+                'screening_id' => $validated['screening_id'],
+                'seat_id' => $validated['seat_id'] // SINGULAR
             ]);
             
             return response()->json($reservation, 201);
